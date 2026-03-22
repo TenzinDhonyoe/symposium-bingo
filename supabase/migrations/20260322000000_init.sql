@@ -17,7 +17,9 @@ create table if not exists photos (
   player_id uuid not null references players(id) on delete cascade,
   square_index integer not null check (square_index >= 0 and square_index <= 24),
   photo_url text not null,
-  created_at timestamptz not null default now()
+  task_text text,
+  created_at timestamptz not null default now(),
+  unique (player_id, square_index)
 );
 
 -- 3. Wins table

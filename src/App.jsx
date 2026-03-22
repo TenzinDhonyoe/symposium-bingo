@@ -140,6 +140,9 @@ export default function App() {
         const photoUrl = await uploadPhoto(sessionId, flatIndex, compressed);
         await savePhoto(playerId, flatIndex, photoUrl, taskText);
 
+        let markedIndices;
+        let winningLine;
+
         setBoard((prev) => {
           const next = prev.map((row) => row.map((sq) => ({ ...sq })));
           const r = Math.floor(flatIndex / 5);
@@ -147,7 +150,7 @@ export default function App() {
           next[r][c].marked = true;
           next[r][c].photoUrl = photoUrl;
 
-          const markedIndices = [];
+          markedIndices = [];
           for (let ri = 0; ri < 5; ri++) {
             for (let ci = 0; ci < 5; ci++) {
               if (next[ri][ci].marked && !next[ri][ci].isCenter) {
@@ -156,18 +159,18 @@ export default function App() {
             }
           }
 
-          updateMarked(playerId, markedIndices).catch(console.error);
-
-          const winningLine = checkBingo(next);
-          if (winningLine && !claimCode) {
-            const code = generateClaimCode();
-            setClaimCode(code);
-            setShowWin(true);
-            claimWin(playerId, code, winningLine).catch(console.error);
-          }
-
+          winningLine = checkBingo(next);
           return next;
         });
+
+        await updateMarked(playerId, markedIndices);
+
+        if (winningLine && !claimCode) {
+          const code = generateClaimCode();
+          setClaimCode(code);
+          setShowWin(true);
+          await claimWin(playerId, code, winningLine);
+        }
       } catch (err) {
         console.error("Capture error:", err);
         alert("Photo upload failed. Check your connection and try again.");

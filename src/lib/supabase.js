@@ -61,29 +61,47 @@ export async function uploadPhoto(sessionId, squareIndex, file) {
 }
 
 export async function savePhoto(playerId, squareIndex, photoUrl, taskText) {
-  const { error } = await supabase.from("photos").insert({
-    player_id: playerId,
-    square_index: squareIndex,
-    photo_url: photoUrl,
-    task_text: taskText,
-  });
+  const { error } = await supabase.from("photos").upsert(
+    {
+      player_id: playerId,
+      square_index: squareIndex,
+      photo_url: photoUrl,
+      task_text: taskText,
+    },
+    { onConflict: "player_id,square_index" }
+  );
 
   if (error) throw error;
 }
 
-export async function claimWin(playerId, claimCode, winningLine) {
-  const { data, error } = await supabase
-    .from("wins")
-    .insert({
-      player_id: playerId,
-      claim_code: claimCode,
-      winning_line: winningLine,
-    })
-    .select()
-    .single();
+export async function claimWin(playerId, claimCode, winningLine, retries = 3) {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    const code =
+      attempt === 0
+        ? claimCode
+        : // regenerate on conflict
+          (() => {
+            const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+            let c = "";
+            for (let i = 0; i < 6; i++)
+              c += chars[Math.floor(Math.random() * chars.length)];
+            return c;
+          })();
 
-  if (error) throw error;
-  return data;
+    const { data, error } = await supabase
+      .from("wins")
+      .insert({
+        player_id: playerId,
+        claim_code: code,
+        winning_line: winningLine,
+      })
+      .select()
+      .single();
+
+    if (!error) return data;
+    if (error.code !== "23505") throw error; // only retry on unique violation
+  }
+  throw new Error("Failed to generate unique claim code");
 }
 
 export async function getWin(playerId) {
