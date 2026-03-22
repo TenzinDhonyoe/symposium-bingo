@@ -26,6 +26,14 @@ export const ALL_SQUARES = [
   "Found a sustainability/climate project",
   "Someone demoed something that didn't work",
   "Youngest demoer you can find",
+  "Got a sticker from a booth",
+  "Found someone who started their project this week",
+  "Met someone who flew in for this",
+  "Talked to an organizer",
+  "Found a team of 3+ people",
+  "Met a solo builder",
+  "Someone explained their project in under 30 seconds",
+  "Found a demoer who's also a designer",
 ];
 
 export function generateBoard() {
