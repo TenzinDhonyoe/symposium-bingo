@@ -1,0 +1,16 @@
+{
+  "name": "Symposium Bingo",
+  "short_name": "Bingo ⁂",
+  "description": "Walk the booths. Take photos. Get bingo.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fdf8f0",
+  "theme_color": "#fdf8f0",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
